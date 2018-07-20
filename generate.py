@@ -11,6 +11,19 @@ SITE_CFG = 'site.cfg'
 
 DEFAULT_INCLUDE_DIRS = ['/usr/include/nanomsg', '/usr/local/include/nanomsg']
 DEFAULT_HOST_LIBRARY = 'nanomsg'
+DEFAULT_LIBRARY_DIR = '/usr/local/lib'
+
+import platform
+if platform.system()=="Windows":
+    if platform.architecture()[0] == "64bit":
+        DEFAULT_INCLUDE_DIRS = [r'C:\Program Files\nanomsg\include\nanomsg']
+        DEFAULT_HOST_LIBRARY = r'C:\Program Files\nanomsg\bin\nanomsg.dll'
+        DEFAULT_LIBRARY_DIR = r'C:\Program Files\nanomsg\lib'
+    else:
+        DEFAULT_INCLUDE_DIRS = [r'C:\Program Files (x86)\nanomsg\include\nanomsg']
+        DEFAULT_HOST_LIBRARY = r'C:\Program Files (x86)\nanomsg\bin\nanomsg.dll'
+        DEFAULT_LIBRARY_DIR = r'C:\Program Files (x86)\nanomsg\lib'
+
 
 BLOCKS = {'{': '}', '(': ')'}
 DEFINITIONS = '''
@@ -110,7 +123,7 @@ def create_module():
     ffi.cdef(DEFINITIONS)
     ffi.cdef(functions(hfiles))
     ffi.set_source('_nnpy', '\n'.join('#include <%s>' % fn for fn in hfiles),
-                   libraries=['nanomsg'], **set_source_args)
+                   library_dirs = [DEFAULT_LIBRARY_DIR], libraries=['nanomsg'], **set_source_args)
 
     with open('nnpy/constants.py', 'w') as f:
         f.write(symbols(ffi, host_library))
